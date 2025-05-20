@@ -58,20 +58,16 @@ canvas {
   width: 150px;
 }
 
-#info p{
+#info p {
   font-size: 20px;
   margin-left: 10px;
 }
 
-#rightside,
-#leftside {
-}
-
-#rightside{
+#rightside {
   order: 3;
 }
 
-#leftside{
+#leftside {
   order: 1;
 }
 
