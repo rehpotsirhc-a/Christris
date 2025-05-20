@@ -1,15 +1,82 @@
-html, body {
-    height: 100%;
-    margin: 0;
-  }
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
 
-  body {
-    background: rgb(27, 27, 27);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+body {
+  background: rgb(27, 27, 27);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  canvas {
-    border: 3px solid white;
-  }
+canvas {
+  border: 3px solid white;
+  width: 320px;
+  height: 640px;
+  order: 2;
+  margin: 20px;
+}
+
+#containers {
+  border: 1px solid rgb(255, 0, 0);
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+
+}
+
+#hold,
+#next {
+  background: rgb(27, 27, 27);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+  margin: 20px;
+  height: 150px;
+  width: 150px;
+}
+
+#next {
+  order: 3;
+}
+
+#hold {
+  order: 1;
+}
+
+#info {
+  background: rgb(27, 27, 27);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-direction: column;
+  border: 3px solid white;
+  margin: 20px;
+  height: 300px;
+  width: 150px;
+}
+
+#info p{
+  font-size: 20px;
+}
+
+#rightside,
+#leftside {
+  border: 1px solid green;
+}
+
+#rightside{
+  order: 3;
+}
+
+#leftside{
+  order: 1;
+}
+
+p {
+  color: white;
+  font-family: Georgia, serif;
+}
