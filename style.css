@@ -20,7 +20,6 @@ canvas {
 }
 
 #containers {
-  border: 1px solid rgb(255, 0, 0);
   width: 100vw;
   display: flex;
   justify-content: center;
@@ -50,7 +49,7 @@ canvas {
 #info {
   background: rgb(27, 27, 27);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-around;
   flex-direction: column;
   border: 3px solid white;
@@ -61,11 +60,11 @@ canvas {
 
 #info p{
   font-size: 20px;
+  margin-left: 10px;
 }
 
 #rightside,
 #leftside {
-  border: 1px solid green;
 }
 
 #rightside{
