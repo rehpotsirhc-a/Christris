@@ -5,7 +5,7 @@ body {
 }
 
 body {
-  background: rgb(27, 27, 27);
+  background: rgb(14, 14, 14);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28,7 +28,7 @@ canvas {
 
 #hold,
 #next {
-  background: rgb(27, 27, 27);
+  background: rgb(14, 14, 14);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,7 +47,7 @@ canvas {
 }
 
 #info {
-  background: rgb(27, 27, 27);
+  background: rgb(14, 14, 14);
   display: flex;
   align-items: flex-start;
   justify-content: space-around;
@@ -74,4 +74,18 @@ canvas {
 p {
   color: white;
   font-family: Georgia, serif;
+}
+
+#hold canvas, #next canvas {
+  display: block;
+  margin: auto;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0px solid white;
+  margin: 20px;
+  height: 150px;
+  width: 150px;
+  transform: translate(20%,30%);
 }
