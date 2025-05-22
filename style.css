@@ -46,18 +46,6 @@ canvas {
   order: 1;
 }
 
-#info {
-  background: rgb(14, 14, 14);
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-around;
-  flex-direction: column;
-  border: 3px solid white;
-  margin: 20px;
-  height: 300px;
-  width: 150px;
-}
-
 #info p {
   font-size: 20px;
   margin-left: 10px;
@@ -76,7 +64,8 @@ p {
   font-family: Georgia, serif;
 }
 
-#hold canvas, #next canvas {
+#hold canvas,
+#next canvas {
   display: block;
   margin: auto;
   height: 100px;
@@ -87,5 +76,133 @@ p {
   margin: 20px;
   height: 150px;
   width: 150px;
-  transform: translate(20%,30%);
+  transform: translate(20%, 30%);
+}
+
+
+button:hover {
+  background-color: white;
+  color: rgb(0, 0, 0)
+}
+
+#next {
+  order: 3;
+}
+
+#hold {
+  order: 1;
+}
+
+#info{
+  background: rgb(14, 14, 14);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  flex-direction: column;
+  border: 0px solid white;
+  margin: 20px;
+  height: 150px;
+  width: 150px;
+}
+
+#info p {
+  font-size: 20px;
+  margin-left: 10px;
+  line-height: 1px;
+}
+
+#rightside {
+  order: 3;
+}
+
+#leftside {
+  order: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+p {
+  color: white;
+  font-family: Georgia, serif;
+}
+
+#hold canvas,
+#next canvas {
+  display: block;
+  margin: auto;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0px solid white;
+  margin: 20px;
+  height: 150px;
+  width: 1500px;
+  transform: translate(20%, 30%);
+}
+
+#pause-menu {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #111;
+  border: 3px solid white;
+  color: white;
+  padding: 30px;
+  font-family: monospace;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  width: 12.2%;
+}
+
+#pause-menu.hidden {
+  display: none;
+}
+
+#pause-menu h2 {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+}
+
+#unify-colors {
+  border: 3px solid white;
+  background-color: #111;
+  color: white;
+}
+
+#unify-colors:hover {
+  color: black;
+  background-color: white;
+}
+
+hr {
+  width: 127%;
+  transform: translate(-11%, 0%);
+  border: 1px solid white;
+  margin-top: 20px;
+}
+
+#restart-button {
+  background-color: rgb(14, 14, 14);
+  color: rgb(255, 255, 255);
+  padding: 10px 20px;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 10px 20px;
+  font-size: 20px;
+  cursor: pointer;
+  border: 3px solid white;
+  z-index: 1000
+}
+
+#restart-button:hover {
+  background-color: white;
+  color: rgb(0, 0, 0);
+  border: 3px solid black;
+
 }
