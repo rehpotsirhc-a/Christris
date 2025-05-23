@@ -55,7 +55,7 @@ function createColorPickers() {
     input.setAttribute('data-name', name);
     input.value = rgbToHex(colors[name]);
 
-    localStorage.setItem('customColors', JSON.stringify(colors));
+localStorage.setItem('customColors', JSON.stringify(colors));
 
     input.addEventListener('input', () => {
       colors[name] = input.value;
@@ -68,10 +68,10 @@ function createColorPickers() {
   }
 
   const savedColors = localStorage.getItem('customColors');
-  if (savedColors) {
-    colors = JSON.parse(savedColors);
-    isUnifiedWhite = Object.values(colors).every(c => c.toLowerCase() === '#ffffff');
-  }
+if (savedColors) {
+  colors = JSON.parse(savedColors);
+  isUnifiedWhite = Object.values(colors).every(c => c.toLowerCase() === '#ffffff');
+}
 
 }
 
@@ -98,7 +98,7 @@ if (unifyButton) {
 
     isUnifiedWhite = !isUnifiedWhite;
   });
-
+  
 }
 
 for (let row = -2; row < 20; row++) {
@@ -107,13 +107,13 @@ for (let row = -2; row < 20; row++) {
 }
 
 const tetrominos = {
-  'I': [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
-  'J': [[1, 0, 0], [1, 1, 1], [0, 0, 0]],
-  'L': [[0, 0, 1], [1, 1, 1], [0, 0, 0]],
-  'O': [[1, 1], [1, 1]],
-  'S': [[0, 1, 1], [1, 1, 0], [0, 0, 0]],
-  'Z': [[1, 1, 0], [0, 1, 1], [0, 0, 0]],
-  'T': [[0, 1, 0], [1, 1, 1], [0, 0, 0]]
+  'I': [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+  'J': [[1,0,0],[1,1,1],[0,0,0]],
+  'L': [[0,0,1],[1,1,1],[0,0,0]],
+  'O': [[1,1],[1,1]],
+  'S': [[0,1,1],[1,1,0],[0,0,0]],
+  'Z': [[1,1,0],[0,1,1],[0,0,0]],
+  'T': [[0,1,0],[1,1,1],[0,0,0]]
 };
 
 function getRandomInt(min, max) {
@@ -121,7 +121,7 @@ function getRandomInt(min, max) {
 }
 
 function generateSequence() {
-  const sequence = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
+  const sequence = ['I','J','L','O','S','T','Z'];
   while (sequence.length) {
     const rand = getRandomInt(0, sequence.length - 1);
     const name = sequence.splice(rand, 1)[0];
@@ -151,9 +151,9 @@ function isValidMove(matrix, cellRow, cellCol) {
       if (
         matrix[row][col] &&
         (cellCol + col < 0 ||
-          cellCol + col >= playfield[0].length ||
-          cellRow + row >= playfield.length ||
-          playfield[cellRow + row][cellCol + col])
+         cellCol + col >= playfield[0].length ||
+         cellRow + row >= playfield.length ||
+         playfield[cellRow + row][cellCol + col])
       ) return false;
     }
   }
@@ -175,12 +175,12 @@ function placeTetromino() {
     if (playfield[row].every(cell => !!cell)) {
       linesCleared++;
       for (let r = row; r > 0; r--) {
-        for (let c = 0; c < playfield[r].length; c++) {
-          playfield[r][c] = playfield[r - 1][c];
-        }
-      }
-      // Clear top row explicitly:
-      playfield[0].fill(0);
+  for (let c = 0; c < playfield[r].length; c++) {
+    playfield[r][c] = playfield[r - 1][c];
+  }
+}
+// Clear top row explicitly:
+playfield[0].fill(0);
     } else row--;
   }
 
@@ -193,15 +193,18 @@ function placeTetromino() {
   }
 
   updateInfo();
-  tetromino = nextTetromino;
-  nextTetromino = getNextTetromino();
+tetromino = nextTetromino;
+nextTetromino = getNextTetromino();
   heldThisTurn = false;
   updatePreview();
 }
 
-
 function updateInfo() {
-
+  document.querySelector('#info').innerHTML = `
+    <p>Score: ${score}</p>
+    <p>Combo: ${combo}</p>
+    <p>Lines: ${lineCount}</p>
+  `;
 }
 
 function showGameOver() {
@@ -258,10 +261,229 @@ function resetGame() {
   rAF = requestAnimationFrame(loop);
 }
 
+function updatePreview() {
+  const canvasNext = document.createElement('canvas');
+  canvasNext.width = 150;
+  canvasNext.height = 150;
+  const ctxNext = canvasNext.getContext('2d');
+  const preview = document.getElementById('next');
+  preview.innerHTML = '';
+  preview.appendChild(canvasNext);
 
+  const matrix = nextTetromino.matrix;
+  const color = colors[nextTetromino.name];
+  const blockSize = 30;
+  ctxNext.fillStyle = color;
+  for (let r = 0; r < matrix.length; r++) {
+    for (let c = 0; c < matrix[r].length; c++) {
+      if (matrix[r][c]) {
+        ctxNext.fillRect(c * blockSize, r * blockSize, blockSize - 2, blockSize - 2);
+      }
+    }
+  }
+}
+
+function updateHoldDisplay() {
+  const holdDiv = document.getElementById('hold');
+  holdDiv.innerHTML = '';
+  if (!hold) return;
+
+  const canvasHold = document.createElement('canvas');
+  canvasHold.width = 150;
+  canvasHold.height = 150;
+  const ctxHold = canvasHold.getContext('2d');
+
+  const matrix = hold.matrix;
+  const color = colors[hold.name];
+  const blockSize = 30;
+
+  ctxHold.fillStyle = color;
+  for (let r = 0; r < matrix.length; r++) {
+    for (let c = 0; c < matrix[r].length; c++) {
+      if (matrix[r][c]) {
+        ctxHold.fillRect(c * blockSize, r * blockSize, blockSize - 2, blockSize - 2);
+      }
+    }
+  }
+
+  holdDiv.appendChild(canvasHold);
+}
+
+let count = 0;
+let tetromino = getNextTetromino();
+let nextTetromino = getNextTetromino();
+let hold = null;
+let heldThisTurn = false;
+let rAF = null;
+let gameOver = false;
+let score = 0;
+let combo = 0;
+let lineCount = 0;
+
+updateInfo();
+updatePreview();
+
+function loop() {
+  rAF = requestAnimationFrame(loop);
+  if (paused || gameOver) return;
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw placed blocks
+  for (let row = 0; row < 20; row++) {
+    for (let col = 0; col < 10; col++) {
+      if (playfield[row][col]) {
+        const name = playfield[row][col];
+        context.fillStyle = colors[name];
+        context.fillRect(col * grid, row * grid, grid - 1, grid - 1);
+      }
+    }
+  }
+
+  if (tetromino) {
+    let ghostRow = tetromino.row;
+    while (isValidMove(tetromino.matrix, ghostRow + 1, tetromino.col)) ghostRow++;
+
+    context.globalAlpha = 0.3;
+    context.fillStyle = colors[tetromino.name];
+    for (let row = 0; row < tetromino.matrix.length; row++) {
+      for (let col = 0; col < tetromino.matrix[row].length; col++) {
+        if (tetromino.matrix[row][col]) {
+          context.fillRect((tetromino.col + col) * grid, (ghostRow + row) * grid, grid - 1, grid - 1);
+        }
+      }
+    }
+    context.globalAlpha = 1.0;
+
+let fallDelay = 50;
+if (speedMode) {
+  fallDelay = Math.max(5, 90 - Math.floor(score / 100));
+}
+
+if (++count > fallDelay) {
+  tetromino.row++;
+  count = 0;
+  if (!isValidMove(tetromino.matrix, tetromino.row, tetromino.col)) {
+    tetromino.row--;
+    placeTetromino();
+  }
+}
+
+
+
+    context.fillStyle = colors[tetromino.name];
+    for (let row = 0; row < tetromino.matrix.length; row++) {
+      for (let col = 0; col < tetromino.matrix[row].length; col++) {
+        if (tetromino.matrix[row][col]) {
+          context.fillRect((tetromino.col + col) * grid, (tetromino.row + row) * grid, grid - 1, grid - 1);
+        }
+      }
+    }
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  
+if (e.code === 'Escape') {
+  paused = !paused;
+  pauseMenu.classList.toggle('hidden', !paused);
+  if (paused) createColorPickers();
+  return;
+}
+  if (gameOver || paused) return;
+
+  if (e.which === 37 || e.which === 39) {
+    const col = e.which === 37 ? tetromino.col - 1 : tetromino.col + 1;
+    if (isValidMove(tetromino.matrix, tetromino.row, col)) tetromino.col = col;
+  }
+
+  if (e.which === 38) {
+    const rotated = rotate(tetromino.matrix);
+    if (isValidMove(rotated, tetromino.row, tetromino.col)) tetromino.matrix = rotated;
+  }
+
+  if (e.which === 40) {
+    const row = tetromino.row + 1;
+    if (!isValidMove(tetromino.matrix, row, tetromino.col)) {
+      tetromino.row = row - 1;
+      placeTetromino();
+    } else tetromino.row = row;
+  }
+
+  if ((e.code === 'ShiftLeft' || e.code === 'ShiftRight') && !heldThisTurn) {
+    if (!hold) {
+      hold = tetromino;
+      tetromino = nextTetromino;
+      nextTetromino = getNextTetromino();
+    } else {
+      [tetromino, hold] = [hold, tetromino];
+    }
+    tetromino.row = tetromino.name === 'I' ? -1 : -2;
+tetromino.col = Math.floor(playfield[0].length / 2 - Math.ceil(tetromino.matrix[0].length / 2));
+
+    heldThisTurn = true;
+    updateHoldDisplay();
+    updatePreview();
+  }
+
+  if (e.which === 32) {
+    while (isValidMove(tetromino.matrix, tetromino.row + 1, tetromino.col)) {
+      tetromino.row++;
+      score += 2;
+    }
+    placeTetromino();
+    updateInfo();
+  }
+
+});
+toggleHold.addEventListener('change', () => {
+  const value = toggleHold.checked;
+  document.getElementById('hold').style.display = value ? 'flex' : 'none';
+  localStorage.setItem('showHold', value);
+});
+
+toggleNext.addEventListener('change', () => {
+  const value = toggleNext.checked;
+  document.getElementById('next').style.display = value ? 'flex' : 'none';
+  localStorage.setItem('showNext', value);
+});
+
+toggleInfo.addEventListener('change', () => {
+  const value = toggleInfo.checked;
+  document.getElementById('info').style.display = value ? 'flex' : 'none';
+  localStorage.setItem('showInfo', value);
+});
+
+window.addEventListener('load', () => {
+  const holdVisible = localStorage.getItem('showHold') === 'true';
+  const nextVisible = localStorage.getItem('showNext') === 'true';
+  const infoVisible = localStorage.getItem('showInfo') === 'true';
+
+  toggleHold.checked = holdVisible;
+  toggleNext.checked = nextVisible;
+  toggleInfo.checked = infoVisible;
+
+  document.getElementById('hold').style.display = holdVisible ? 'flex' : 'none';
+  document.getElementById('next').style.display = nextVisible ? 'flex' : 'none';
+  document.getElementById('info').style.display = infoVisible ? 'flex' : 'none';
+
+
+});
 
 rAF = requestAnimationFrame(loop);
 
 
 let speedMode = false;
 const speedToggle = document.getElementById('speed-mode-toggle');
+
+window.addEventListener('load', () => {
+  // ...existing code
+  const savedSpeedMode = localStorage.getItem('speedMode') === 'true';
+  speedToggle.checked = savedSpeedMode;
+  speedMode = savedSpeedMode;
+});
+
+speedToggle.addEventListener('change', () => {
+  speedMode = speedToggle.checked;
+  localStorage.setItem('speedMode', speedMode);
+});
