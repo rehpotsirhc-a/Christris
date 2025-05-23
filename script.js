@@ -201,9 +201,7 @@ nextTetromino = getNextTetromino();
 
 function updateInfo() {
   document.querySelector('#info').innerHTML = `
-    <p>Score: ${score}</p>
-    <p>Combo: ${combo}</p>
-    <p>Lines: ${lineCount}</p>
+
   `;
 }
 
@@ -384,12 +382,7 @@ if (++count > fallDelay) {
 
 document.addEventListener('keydown', function(e) {
   
-if (e.code === 'Escape') {
-  paused = !paused;
-  pauseMenu.classList.toggle('hidden', !paused);
-  if (paused) createColorPickers();
-  return;
-}
+
   if (gameOver || paused) return;
 
   if (e.which === 37 || e.which === 39) {
