@@ -24,44 +24,7 @@ canvas {
   justify-content: center;
 }
 
-#hold {
-  background: rgb(14, 14, 14);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 3px solid white;
-  height: 150px;
-  width: 150px;
 
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: #222;
-  padding: 10px;
-  border-radius: 6px;
-  border: 2px solid #555;
-  min-width: 150px;
-}
-
-
-#next {
-  background: rgb(14, 14, 14);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 3px solid white;
-  height: 480px;
-  width: 150px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: #222;
-  padding: 10px;
-  border-radius: 6px;
-  border: 2px solid #555;
-  min-width: 150px;
-}
 
 p {
   color: white;
@@ -80,8 +43,8 @@ button:hover {
   justify-content: space-around;
   flex-direction: column;
   border: 3px solid white;
-  height: 150px;
-  width: 150px;
+  height: 100px;
+  width: 100px;
 }
 
 #leftside {
@@ -95,8 +58,7 @@ p {
   font-family: monospace;
 }
 
-#hold canvas,
-#next canvas {
+#hold canvas{
   display: block;
   margin: auto;
   height: 100px;
@@ -105,9 +67,63 @@ p {
   justify-content: center;
   border: 0px solid white;
   margin: 20px;
-  height: 150px;
-  width: 150px;
+  height: 130px;
+  width: 130px;
   transform: translate(20%, 30%);
+}
+
+
+#hold {
+  background: rgb(14, 14, 14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+  height: 100px;
+  width: 100px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #222;
+  padding: 10px;
+  border-radius: 6px;
+  border: 2px solid #555;
+  min-width: 100px;
+}
+
+#next canvas {
+  display: block;
+  margin: auto;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0px solid white;
+  margin-left: 5px;
+  height: 120px;
+  width: 120px;
+}
+
+
+
+#next {
+  background: rgb(14, 14, 14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+  height: 480px;
+  width: 100px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #222;
+  padding: 10px;
+  border-radius: 6px;
+  border: 2px solid #555;
+  min-width: 100px;
 }
 
 #pause-menu {
@@ -224,11 +240,12 @@ canvas#game {
   padding: 10px;
   border-radius: 6px;
   border: 2px solid #555;
-  min-width: 150px;
+  min-width: 100px;
 }
 
 #info p {
-  font-size: 15px
+  font-size: 15px;
+  margin: 0;
 }
 
 #rightside {

@@ -385,7 +385,9 @@ function updatePreview() {
   const preview = document.getElementById('next');
   preview.innerHTML = '';
 
-  nextTetrominos.forEach(tet => {
+  const previewQueue = [nextTetromino, ...nextTetrominos]; // include the immediate next one
+
+  previewQueue.forEach(tet => {
     const canvasNext = document.createElement('canvas');
     canvasNext.width = 120;
     canvasNext.height = 120;
@@ -407,6 +409,7 @@ function updatePreview() {
     preview.appendChild(canvasNext);
   });
 }
+
 
 
 function updateHoldDisplay() {
