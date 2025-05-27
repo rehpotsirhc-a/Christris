@@ -10,45 +10,107 @@
 
 <body>
     <div id="containers">
-
-        <canvas width="320" height="640" id="game"></canvas>
-
         <div id="pause-menu" class="hidden">
             <h2>Paused</h2>
 
-            <p>Display Options</p>
-            <label><input type="checkbox" id="toggle-hold" checked> Show Hold</label>
-            <label><input type="checkbox" id="toggle-next" checked> Show Next</label>
-            <label><input type="checkbox" id="toggle-info" checked> Show Info</label>
+            <div id="controls">
+                <p class='header'>Controls:</p>
+
+                <p>
+                    ←/→ - Move Left/Right
+                    <br>
+                    ↑/D - Rotate Clockwise
+                    <br>
+                    S - Rotate Counter-Clockwise
+                    <br>
+                    ↓/Numpad5 - Soft drop
+                    <br>
+                    Space - Hard drop
+                    <br>
+                    Shift - Hold/Call
+                    <br>
+                    Escape - Pause/Unpause
+                </p>
+
+            </div>
+
 
             <hr>
 
-            <p>Game Modifiers</p>
-            <label><input type="checkbox" id="speed-mode-toggle" />Speed Increases With Score</label>
-            <button id="unify-colors">Set All Colors to White</button>
+
+            <div id="settings">
+
+                <p class="header">Options:</p>
+                <label><input type="checkbox" id="toggle-hold" checked> Show Hold</label>
+                <label><input type="checkbox" id="toggle-next" checked> Show Next</label>
+                <label><input type="checkbox" id="toggle-info" checked> Show Info</label>
+                <label>
+                    <input type="checkbox" id="toggle-music" checked>
+                    Play Music
+                </label>
+                <label>
+                    <input type="checkbox" id="toggle-shake" checked>
+                    Matrix Bounce
+                </label>
+
+            </div>
+
+
+            <hr>
+
+
+            <div id="scores">
+
+                <p class="header">High Scores:</p>
+                <div id="pause-highs"></div>
+                <button class="reset" onclick="resetHighStats()">Reset Stats</button>
+
+            </div>
+
+
+            <hr>
+
+
+            <div id="modifiers">
+
+                <p class="header">Game Modifiers:</p>
+                <label class="speed-mode-toggle">
+                    <input type="checkbox" id="speed-mode-toggle" />
+                    Hard Mode
+                </label>
+                <button id="unify-colors">Set All Colors to White</button>
+            </div>
+        </div>
+        <div id="game-container" style="position: relative;">
+            <canvas id="game" width="320" height="640"></canvas>
 
         </div>
 
 
         <div id="leftside">
-            <div id="hold"></div>
+
+            <div id="hold">
+
+            </div>
+
         </div>
+
 
         <div id="rightside">
 
             <div id="next"></div>
 
             <div id="info">
-                <p></p>
-                <p></p>
-                <p></p>
+                <p>Score:</p>
+                <p>Combo:</p>
+                <p>Lines:</p>
             </div>
 
         </div>
 
 
-
         <script src="script.js"></script>
+
     </div>
 </body>
 
