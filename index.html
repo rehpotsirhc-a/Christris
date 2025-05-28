@@ -44,15 +44,22 @@
                 <label><input type="checkbox" id="toggle-hold" checked> Show Hold</label>
                 <label><input type="checkbox" id="toggle-next" checked> Show Next</label>
                 <label><input type="checkbox" id="toggle-info" checked> Show Info</label>
-                <label>
-                    <input type="checkbox" id="toggle-music" checked>
-                    Play Music
-                </label>
+
                 <label>
                     <input type="checkbox" id="toggle-shake" checked>
                     Matrix Bounce
                 </label>
 
+                <label>
+                    <input type="checkbox" id="toggle-music" checked>
+                    Play Music
+                </label>
+
+                <div id="volume-control">
+                    <label for="volume-slider">Volume:</label>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.01">
+                    <span id="volume-percentage">50%</span>
+                </div>
             </div>
 
 
@@ -73,7 +80,7 @@
 
             <div id="modifiers">
 
-                <p class="header">Game Modifiers:</p>
+                <p class="header">Game Modifiers</p>
                 <label class="speed-mode-toggle">
                     <input type="checkbox" id="speed-mode-toggle" />
                     Hard Mode

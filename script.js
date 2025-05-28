@@ -19,13 +19,18 @@ let lockCounter = 0;
 let isTouchingGround = false;
 const toggleMusic = document.getElementById('toggle-music');
 const toggleShake = document.getElementById('toggle-shake');
-let musicEnabled = toggleMusic.checked;
+let musicEnabled = localStorage.getItem('musicEnabled') === 'true';
+toggleMusic.checked = musicEnabled;
+
 let shakeEnabled = toggleShake.checked;
 let highScore = parseInt(localStorage.getItem('highScore')) || 0;
 let highCombo = parseInt(localStorage.getItem('highCombo')) || 0;
 let highLines = parseInt(localStorage.getItem('highLines')) || 0;
 const speedToggle = document.getElementById('speed-mode-toggle');
 let speedMode = speedToggle.checked;
+
+
+
 
 speedToggle.addEventListener('change', () => {
   speedMode = speedToggle.checked;
@@ -54,13 +59,36 @@ backgroundMusic.volume = 0.2;
 let musicStarted = false;
 
 function startBackgroundMusic() {
-  if (!musicStarted && !gameOver && musicEnabled) {
+  if (!musicStarted && !gameOver && musicEnabled && globalVolume > 0) {
+    backgroundMusic.volume = globalVolume;
     backgroundMusic.play().catch((e) => {
       console.warn('Autoplay blocked until user interacts:', e);
     });
     musicStarted = true;
   }
 }
+
+
+const volumeSlider = document.getElementById('volume-slider');
+const volumePercentage = document.getElementById('volume-percentage');
+let globalVolume = parseFloat(localStorage.getItem('globalVolume')) || 0.5;
+
+volumeSlider.value = globalVolume;
+volumePercentage.textContent = Math.round(globalVolume * 100) + '%';
+
+// Update percentage and volume on slider change
+volumeSlider.addEventListener('input', () => {
+  globalVolume = parseFloat(volumeSlider.value);
+  localStorage.setItem('globalVolume', globalVolume);
+  volumePercentage.textContent = Math.round(globalVolume * 100) + '%';
+
+  backgroundMusic.volume = musicEnabled ? globalVolume : 0;
+});
+
+
+// Set initial volume for background music
+backgroundMusic.volume = musicEnabled ? globalVolume : 0;
+
 
 document.addEventListener('click', startBackgroundMusic, { once: true });
 document.addEventListener('keydown', startBackgroundMusic, { once: true });
@@ -74,8 +102,13 @@ function advanceTetromino() {
 
 function playSound(sound) {
   const s = sounds[sound].cloneNode();
-  s.play();
+  s.volume = globalVolume;
+  s.play().catch(err => {
+    console.warn('Sound play failed:', err);
+  });
 }
+
+
 
 toggleHold.addEventListener('change', () => {
   document.getElementById('hold').style.display = toggleHold.checked ? 'flex' : 'none';
@@ -121,6 +154,8 @@ function shakeCanvas(direction) {
     container.style.transform = 'translate(0, 0)';
   }, 80);
 }
+
+
 
 const defaultColors = {
   'I': 'Cyan',
@@ -478,7 +513,7 @@ function loop() {
       context.fillRect(0, row * grid, 10 * grid, grid - 1);
     }
 
-    if (clearAnimationFrame > 20) {
+    if (clearAnimationFrame > 40) {
       clearingLines.sort((a, b) => a - b);
 
       for (let i = 0; i < clearingLines.length; i++) {
@@ -793,3 +828,157 @@ if (musicEnabled && !gameOver) {
 toggleShake.addEventListener('change', () => {
   shakeEnabled = toggleShake.checked;
 });
+
+toggleMusic.addEventListener('change', () => {
+  musicEnabled = toggleMusic.checked;
+  localStorage.setItem('musicEnabled', musicEnabled);
+
+  if (musicEnabled && !paused && !gameOver) {
+    backgroundMusic.play().catch(e => console.warn('Could not play music:', e));
+  } else {
+    backgroundMusic.pause();
+  }
+});
+
+volumeSlider.addEventListener('input', () => {
+  globalVolume = parseFloat(volumeSlider.value);
+  localStorage.setItem('globalVolume', globalVolume);
+  backgroundMusic.volume = musicEnabled ? globalVolume : 0;
+});
+
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+const swipeThreshold = 30;
+
+canvas.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 1) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }
+}, { passive: true });
+
+canvas.addEventListener('touchend', (e) => {
+  if (gameOver || paused || isClearing) return;
+
+  touchEndX = e.changedTouches[0].clientX;
+  touchEndY = e.changedTouches[0].clientY;
+
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+  const absX = Math.abs(deltaX);
+  const absY = Math.abs(deltaY);
+
+  if (absX < swipeThreshold && absY < swipeThreshold) {
+    // Tap → rotate
+    const rotated = rotate(tetromino.matrix);
+    if (isValidMove(rotated, tetromino.row, tetromino.col)) {
+      tetromino.matrix = rotated;
+      lockStartTime = null;
+      isTouchingGround = false;
+      playSound('rotate');
+    } else {
+      const kicks = [-1, 1, -2, 2];
+      for (let i = 0; i < kicks.length; i++) {
+        const newCol = tetromino.col + kicks[i];
+        if (isValidMove(rotated, tetromino.row, newCol)) {
+          tetromino.col = newCol;
+          tetromino.matrix = rotated;
+          lockStartTime = null;
+          isTouchingGround = false;
+          playSound('rotate');
+          break;
+        }
+      }
+    }
+    return;
+  }
+
+  if (absX > absY) {
+    // Horizontal swipe → move left or right
+    const newCol = deltaX > 0 ? tetromino.col + 1 : tetromino.col - 1;
+    if (isValidMove(tetromino.matrix, tetromino.row, newCol)) {
+      tetromino.col = newCol;
+      playSound('move');
+    } else {
+      shakeCanvas(deltaX > 0 ? 'right' : 'left');
+    }
+  } else {
+    if (deltaY > 0) {
+      // Swipe down → hard drop
+      while (isValidMove(tetromino.matrix, tetromino.row + 1, tetromino.col)) {
+        tetromino.row++;
+      }
+      playSound('harddrop');
+      shakeCanvas('down');
+      placeTetromino();
+    } else {
+      // Swipe up → hold
+      if (!heldThisTurn) {
+        if (!hold) {
+          playSound('hold');
+          hold = tetromino;
+          tetromino = nextTetromino;
+          nextTetrominos.push(getNextTetromino());
+          nextTetromino = nextTetrominos.shift();
+        } else {
+          [tetromino, hold] = [hold, tetromino];
+          playSound('hold');
+        }
+
+        tetromino.row = tetromino.name === 'I' ? -1 : -2;
+        tetromino.col = Math.floor(playfield[0].length / 2 - Math.ceil(tetromino.matrix[0].length / 2));
+        heldThisTurn = true;
+        updateHoldDisplay();
+        updatePreview();
+      }
+    }
+  }
+}, { passive: true });
+
+canvas.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 2) {
+    // Save the initial time and positions for two-finger tap
+    canvas.dataset.twoFingerTapStart = Date.now();
+  }
+}, { passive: true });
+
+pauseMenu.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 2) {
+    pauseMenu.dataset.twoFingerTapStart = Date.now();
+  }
+}, { passive: true });
+
+pauseMenu.addEventListener('touchend', (e) => {
+  if (e.touches.length === 0 && e.changedTouches.length === 2) {
+    const tapDuration = Date.now() - (pauseMenu.dataset.twoFingerTapStart || 0);
+    if (tapDuration < 300) {
+      paused = false;
+      playSound('pause');
+      pauseMenu.classList.add('hidden');
+      if (musicEnabled) backgroundMusic.play();
+    }
+  }
+}, { passive: true });
+
+
+canvas.addEventListener('touchend', (e) => {
+  if (e.touches.length === 0 && e.changedTouches.length === 2) {
+    const tapDuration = Date.now() - (canvas.dataset.twoFingerTapStart || 0);
+    if (tapDuration < 300) {
+      // Toggle pause menu
+      paused = !paused;
+      playSound('pause');
+      pauseMenu.classList.toggle('hidden', !paused);
+
+      if (paused) {
+        if (musicEnabled) backgroundMusic.pause();
+        createColorPickers();
+        updatePauseMenuStats();
+      } else {
+        if (musicEnabled) backgroundMusic.play();
+      }
+    }
+  }
+}, { passive: true });
