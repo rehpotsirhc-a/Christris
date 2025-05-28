@@ -574,15 +574,15 @@ function loop() {
 
     let baseSpeed = 55;
     let minSpeed = 5;
-    let speedDecrease = Math.floor(score / 500);
-    
     let fallDelay;
+    
     if (speedMode) {
-      fallDelay = baseSpeed - speedDecrease;
-      if (fallDelay < minSpeed) fallDelay = minSpeed;
+      let level = Math.floor(score / 500);
+      fallDelay = Math.max(minSpeed, baseSpeed * Math.pow(0.9, level));
     } else {
       fallDelay = baseSpeed;
     }
+    
 
     if (++count > fallDelay) {
       tetromino.row++;
