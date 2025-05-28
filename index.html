@@ -51,7 +51,7 @@
                 </label>
 
                 <label>
-                    <input type="checkbox" id="toggle-music" checked>
+                    <input type="checkbox" id="toggle-music" unchecked>
                     Play Music
                 </label>
 
@@ -81,12 +81,18 @@
             <div id="modifiers">
 
                 <p class="header">Game Modifiers</p>
+
                 <label class="speed-mode-toggle">
                     <input type="checkbox" id="speed-mode-toggle" />
-                    Increase Speed With Score
+                    Speed Scales w/ Score
                 </label>
-                <button id="unify-colors">Set All Colors to White</button>
+
+                <label>
+                <input type="checkbox" id="unify-colors"> Set All Color to White</input>
+                </label>
+
             </div>
+
         </div>
         <div id="game-container" style="position: relative;">
             <canvas id="game" width="320" height="640"></canvas>
