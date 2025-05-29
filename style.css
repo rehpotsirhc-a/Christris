@@ -327,5 +327,4 @@ canvas#game {
 #volume-control {
   display: flex;
  align-items: center;
-  transform: translate(-9%, 0%);
 }

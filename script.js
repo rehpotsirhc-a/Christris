@@ -30,6 +30,16 @@ const speedToggle = document.getElementById('speed-mode-toggle');
 let speedMode = speedToggle.checked;
 
 
+const toggleClearAnimation = document.getElementById('toggle-clear-animation');
+let clearAnimationEnabled = toggleClearAnimation.checked;
+
+
+
+// Load from localStorage if desired
+if (localStorage.getItem('clearAnimationEnabled') !== null) {
+  clearAnimationEnabled = localStorage.getItem('clearAnimationEnabled') === 'true';
+  toggleClearAnimation.checked = clearAnimationEnabled;
+}
 
 
 speedToggle.addEventListener('change', () => {
@@ -38,7 +48,7 @@ speedToggle.addEventListener('change', () => {
 
 
 let lastCollisionTime = 0;
-const collisionCooldown = 300;
+const collisionCooldown = 150;
 
 const sounds = {
   move: new Audio('sounds/move.mp3'),
@@ -76,7 +86,6 @@ let globalVolume = parseFloat(localStorage.getItem('globalVolume')) || 0.5;
 volumeSlider.value = globalVolume;
 volumePercentage.textContent = Math.round(globalVolume * 100) + '%';
 
-// Update percentage and volume on slider change
 volumeSlider.addEventListener('input', () => {
   globalVolume = parseFloat(volumeSlider.value);
   localStorage.setItem('globalVolume', globalVolume);
@@ -86,7 +95,6 @@ volumeSlider.addEventListener('input', () => {
 });
 
 
-// Set initial volume for background music
 backgroundMusic.volume = musicEnabled ? globalVolume : 0;
 
 
@@ -139,11 +147,11 @@ function shakeCanvas(direction) {
   let transform;
 
   if (direction === 'left') {
-    transform = 'translateX(-13px)';
+    transform = 'translateX(-8px)';
   } else if (direction === 'right') {
-    transform = 'translateX(13px)';
+    transform = 'translateX(8px)';
   } else if (direction === 'down') {
-    transform = 'translateY(13px)';
+    transform = 'translateY(8px)';
   } else {
     transform = 'none';
   }
@@ -152,7 +160,7 @@ function shakeCanvas(direction) {
 
   setTimeout(() => {
     container.style.transform = 'translate(0, 0)';
-  }, 80);
+  }, 50);
 }
 
 
@@ -220,15 +228,17 @@ if (unifyButton) {
       for (const key in colors) colors[key] = defaultColors[key];
       unifyButton.textContent = 'Set All Colors to White';
     }
+  
     const inputs = document.querySelectorAll('#color-pickers input[type="color"]');
     inputs.forEach(input => {
       const name = input.getAttribute('data-name');
       input.value = rgbToHex(colors[name]);
     });
-
+  
     isUnifiedWhite = !isUnifiedWhite;
+    localStorage.setItem('isUnifiedWhite', JSON.stringify(isUnifiedWhite)); // <-- Save toggle state
   });
-
+  
 }
 
 for (let row = -2; row < 20; row++) {
@@ -420,7 +430,7 @@ function updatePreview() {
   const preview = document.getElementById('next');
   preview.innerHTML = '';
 
-  const previewQueue = [nextTetromino, ...nextTetrominos]; // include the immediate next one
+  const previewQueue = [nextTetromino, ...nextTetrominos]; 
 
   previewQueue.forEach(tet => {
     const canvasNext = document.createElement('canvas');
@@ -475,7 +485,7 @@ function updateHoldDisplay() {
 let count = 0;
 let tetromino = getNextTetromino();
 nextTetrominos = [getNextTetromino(), getNextTetromino(), getNextTetromino(), getNextTetromino()];
-nextTetromino = nextTetrominos.shift(); // 3 remain
+nextTetromino = nextTetrominos.shift(); 
 
 
 let hold = null;
@@ -504,16 +514,23 @@ function loop() {
       }
     }
   }
-
   if (isClearing) {
-    clearAnimationFrame++;
+    if (clearAnimationEnabled) {
+      clearAnimationFrame++;
+  
+      for (const row of clearingLines) {
+        context.fillStyle = clearAnimationFrame % 10 < 5 ? 'white' : 'black';
+        context.fillRect(0, row * grid, 10 * grid, grid - 1);
+      }
 
-    for (const row of clearingLines) {
-      context.fillStyle = clearAnimationFrame % 10 < 5 ? 'white' : 'black';
-      context.fillRect(0, row * grid, 10 * grid, grid - 1);
+      if (clearAnimationFrame > 40) {
+        finalizeLineClear();
+      }
+    } else {
+      finalizeLineClear();
     }
 
-    if (clearAnimationFrame > 40) {
+    if (clearAnimationFrame > 22) {
       clearingLines.sort((a, b) => a - b);
 
       for (let i = 0; i < clearingLines.length; i++) {
@@ -605,6 +622,28 @@ function loop() {
   }
 }
 
+function finalizeLineClear() {
+  clearingLines.sort((a, b) => a - b);
+
+  for (let i = 0; i < clearingLines.length; i++) {
+    const row = clearingLines[i];
+    for (let r = row; r > 0; r--) {
+      playfield[r] = [...playfield[r - 1]];
+    }
+    playfield[0] = new Array(10).fill(0);
+  }
+
+  const linesCleared = clearingLines.length;
+  lineCount += linesCleared;
+  score += (linesCleared ** 2) * 100;
+  combo += 1;
+  updateInfo();
+  isClearing = false;
+  clearingLines = [];
+  advanceTetromino();
+}
+
+
 function updatePauseMenuStats() {
   document.getElementById('pause-highs').innerHTML = `
     <p>High Score:${highScore}</p>
@@ -636,6 +675,32 @@ document.addEventListener('keydown', function (e) {
     <p>Most Lines: ${highLines}</p>
   `;
   }
+
+  document.addEventListener('keydown', (e) => {
+    if (paused || gameOver || keysHeld[e.code]) return;
+  
+    keysHeld[e.code] = true;
+  
+    handleKeyPress(e.code); // initial press
+    keyRepeatTimers[e.code] = {
+      delayTimer: setTimeout(() => {
+        keyRepeatTimers[e.code].repeatInterval = setInterval(() => {
+          handleKeyPress(e.code);
+        }, repeatRate);
+      }, repeatDelay)
+    };
+  });
+  
+  document.addEventListener('keyup', (e) => {
+    keysHeld[e.code] = false;
+  
+    if (keyRepeatTimers[e.code]) {
+      clearTimeout(keyRepeatTimers[e.code].delayTimer);
+      clearInterval(keyRepeatTimers[e.code].repeatInterval);
+      delete keyRepeatTimers[e.code];
+    }
+  });
+  
 
   if (gameOver || paused || isClearing) return;
 
@@ -881,7 +946,6 @@ canvas.addEventListener('touchend', (e) => {
   const absY = Math.abs(deltaY);
 
   if (absX < swipeThreshold && absY < swipeThreshold) {
-    // Tap → rotate
     const rotated = rotate(tetromino.matrix);
     if (isValidMove(rotated, tetromino.row, tetromino.col)) {
       tetromino.matrix = rotated;
@@ -906,7 +970,6 @@ canvas.addEventListener('touchend', (e) => {
   }
 
   if (absX > absY) {
-    // Horizontal swipe → move left or right
     const newCol = deltaX > 0 ? tetromino.col + 1 : tetromino.col - 1;
     if (isValidMove(tetromino.matrix, tetromino.row, newCol)) {
       tetromino.col = newCol;
@@ -916,7 +979,6 @@ canvas.addEventListener('touchend', (e) => {
     }
   } else {
     if (deltaY > 0) {
-      // Swipe down → hard drop
       while (isValidMove(tetromino.matrix, tetromino.row + 1, tetromino.col)) {
         tetromino.row++;
       }
@@ -924,7 +986,6 @@ canvas.addEventListener('touchend', (e) => {
       shakeCanvas('down');
       placeTetromino();
     } else {
-      // Swipe up → hold
       if (!heldThisTurn) {
         if (!hold) {
           playSound('hold');
@@ -949,7 +1010,6 @@ canvas.addEventListener('touchend', (e) => {
 
 canvas.addEventListener('touchstart', (e) => {
   if (e.touches.length === 2) {
-    // Save the initial time and positions for two-finger tap
     canvas.dataset.twoFingerTapStart = Date.now();
   }
 }, { passive: true });
@@ -977,7 +1037,6 @@ canvas.addEventListener('touchend', (e) => {
   if (e.touches.length === 0 && e.changedTouches.length === 2) {
     const tapDuration = Date.now() - (canvas.dataset.twoFingerTapStart || 0);
     if (tapDuration < 300) {
-      // Toggle pause menu
       paused = !paused;
       playSound('pause');
       pauseMenu.classList.toggle('hidden', !paused);
@@ -992,3 +1051,9 @@ canvas.addEventListener('touchend', (e) => {
     }
   }
 }, { passive: true });
+
+toggleClearAnimation.addEventListener('change', () => {
+  clearAnimationEnabled = toggleClearAnimation.checked;
+  localStorage.setItem('clearAnimationEnabled', clearAnimationEnabled);
+});
+
