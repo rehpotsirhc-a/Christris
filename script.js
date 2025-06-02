@@ -21,21 +21,16 @@ const toggleMusic = document.getElementById('toggle-music');
 const toggleShake = document.getElementById('toggle-shake');
 let musicEnabled = localStorage.getItem('musicEnabled') === 'true';
 toggleMusic.checked = musicEnabled;
-
 let shakeEnabled = toggleShake.checked;
 let highScore = parseInt(localStorage.getItem('highScore')) || 0;
 let highCombo = parseInt(localStorage.getItem('highCombo')) || 0;
 let highLines = parseInt(localStorage.getItem('highLines')) || 0;
 const speedToggle = document.getElementById('speed-mode-toggle');
 let speedMode = speedToggle.checked;
-
-
 const toggleClearAnimation = document.getElementById('toggle-clear-animation');
 let clearAnimationEnabled = toggleClearAnimation.checked;
 
 
-
-// Load from localStorage if desired
 if (localStorage.getItem('clearAnimationEnabled') !== null) {
   clearAnimationEnabled = localStorage.getItem('clearAnimationEnabled') === 'true';
   toggleClearAnimation.checked = clearAnimationEnabled;
@@ -48,7 +43,7 @@ speedToggle.addEventListener('change', () => {
 
 
 let lastCollisionTime = 0;
-const collisionCooldown = 150;
+const collisionCooldown = 300;
 
 const sounds = {
   move: new Audio('sounds/move.mp3'),
@@ -173,6 +168,7 @@ const defaultColors = {
   'Z': 'Red',
   'J': 'DodgerBlue',
   'L': 'Orange',
+  'N': 'Red',
 };
 let colors = { ...defaultColors };
 let isUnifiedWhite = false;
@@ -228,17 +224,17 @@ if (unifyButton) {
       for (const key in colors) colors[key] = defaultColors[key];
       unifyButton.textContent = 'Set All Colors to White';
     }
-  
+
     const inputs = document.querySelectorAll('#color-pickers input[type="color"]');
     inputs.forEach(input => {
       const name = input.getAttribute('data-name');
       input.value = rgbToHex(colors[name]);
     });
-  
+
     isUnifiedWhite = !isUnifiedWhite;
-    localStorage.setItem('isUnifiedWhite', JSON.stringify(isUnifiedWhite)); // <-- Save toggle state
+    localStorage.setItem('isUnifiedWhite', JSON.stringify(isUnifiedWhite));
   });
-  
+
 }
 
 for (let row = -2; row < 20; row++) {
@@ -247,33 +243,34 @@ for (let row = -2; row < 20; row++) {
 }
 
 const tetrominos = {
-  'I': [[0, 0, 0, 0], 
-        [1, 1, 1, 1], 
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]],
-        
-  'J': [[1, 0, 0], 
-       [1, 1, 1], 
-       [0, 0, 0]],
+  'I': [[0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0]],
 
-  'L': [[0, 0, 1], 
-        [1, 1, 1], 
+  'J': [[1, 0, 0],
+        [1, 1, 1],
         [0, 0, 0]],
 
-  'O': [[1, 1], 
+  'L': [[0, 0, 1],
+        [1, 1, 1],
+        [0, 0, 0]],
+
+  'O': [[1, 1],
         [1, 1]],
 
-  'S': [[0, 1, 1], 
-        [1, 1, 0], 
+  'S': [[0, 1, 1],
+        [1, 1, 0],
         [0, 0, 0]],
 
-  'Z': [[1, 1, 0], 
-        [0, 1, 1], 
+  'Z': [[1, 1, 0],
+        [0, 1, 1],
         [0, 0, 0]],
 
-  'T': [[0, 1, 0], 
-        [1, 1, 1], 
-        [0, 0, 0]]
+  'T': [[0, 1, 0],
+        [1, 1, 1],
+        [0, 0, 0]],
+
 };
 
 function getRandomInt(min, max) {
@@ -281,7 +278,7 @@ function getRandomInt(min, max) {
 }
 
 function generateSequence() {
-  const sequence = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
+  const sequence = ['I', 'J', 'L', 'O', 'S', 'T', 'Z',];
   while (sequence.length) {
     const rand = getRandomInt(0, sequence.length - 1);
     const name = sequence.splice(rand, 1)[0];
@@ -362,7 +359,7 @@ function placeTetromino() {
     playSound('clear');
   } else {
     combo = 0;
-    proceedAfterClear(); 
+    proceedAfterClear();
   }
   updateInfo();
   updatePreview();
@@ -420,11 +417,11 @@ function resetGame() {
     }
   }
 
-tetrominoSequence.length = 0;
-generateSequence();
-tetromino = getNextTetromino();
-nextTetrominos = [getNextTetromino(), getNextTetromino()];
-nextTetromino = getNextTetromino();
+  tetrominoSequence.length = 0;
+  generateSequence();
+  tetromino = getNextTetromino();
+  nextTetrominos = [getNextTetromino(), getNextTetromino()];
+  nextTetromino = getNextTetromino();
 
   hold = null;
   heldThisTurn = false;
@@ -450,7 +447,7 @@ function updatePreview() {
   const preview = document.getElementById('next');
   preview.innerHTML = '';
 
-  const previewQueue = [nextTetromino, ...nextTetrominos]; 
+  const previewQueue = [nextTetromino, ...nextTetrominos];
 
   previewQueue.forEach(tet => {
     const canvasNext = document.createElement('canvas');
@@ -505,7 +502,7 @@ function updateHoldDisplay() {
 let count = 0;
 let tetromino = getNextTetromino();
 nextTetrominos = [getNextTetromino(), getNextTetromino(), getNextTetromino(), getNextTetromino()];
-nextTetromino = nextTetrominos.shift(); 
+nextTetromino = nextTetrominos.shift();
 
 
 let hold = null;
@@ -537,7 +534,7 @@ function loop() {
   if (isClearing) {
     if (clearAnimationEnabled) {
       clearAnimationFrame++;
-  
+
       for (const row of clearingLines) {
         context.fillStyle = clearAnimationFrame % 10 < 5 ? 'white' : 'black';
         context.fillRect(0, row * grid, 10 * grid, grid - 1);
@@ -557,7 +554,7 @@ function loop() {
         const row = clearingLines[i];
 
         for (let r = row; r > 0; r--) {
-          playfield[r] = [...playfield[r - 1]]; 
+          playfield[r] = [...playfield[r - 1]];
         }
         playfield[0] = new Array(10).fill(0);
       }
@@ -582,7 +579,7 @@ function loop() {
 
       updateInfo();
       advanceTetromino();
-      
+
       heldThisTurn = false;
       updatePreview();
 
@@ -612,14 +609,14 @@ function loop() {
     let baseSpeed = 55;
     let minSpeed = 5;
     let fallDelay;
-    
+
     if (speedMode) {
       let level = Math.floor(score / 500);
       fallDelay = Math.max(minSpeed, baseSpeed * Math.pow(0.9, level));
     } else {
       fallDelay = baseSpeed;
     }
-    
+
 
     if (++count > fallDelay) {
       tetromino.row++;
@@ -697,11 +694,11 @@ document.addEventListener('keydown', function (e) {
   }
 
   document.addEventListener('keydown', (e) => {
-    if (paused || gameOver || keysHeld[e.code]) return;
-  
+    if (paused || gameOver || [e.code]) return;
+
     keysHeld[e.code] = true;
-  
-    handleKeyPress(e.code); // initial press
+
+    handleKeyPress(e.code);
     keyRepeatTimers[e.code] = {
       delayTimer: setTimeout(() => {
         keyRepeatTimers[e.code].repeatInterval = setInterval(() => {
@@ -710,17 +707,6 @@ document.addEventListener('keydown', function (e) {
       }, repeatDelay)
     };
   });
-  
-  document.addEventListener('keyup', (e) => {
-    keysHeld[e.code] = false;
-  
-    if (keyRepeatTimers[e.code]) {
-      clearTimeout(keyRepeatTimers[e.code].delayTimer);
-      clearInterval(keyRepeatTimers[e.code].repeatInterval);
-      delete keyRepeatTimers[e.code];
-    }
-  });
-  
 
   if (gameOver || paused || isClearing) return;
 
@@ -776,7 +762,7 @@ document.addEventListener('keydown', function (e) {
       tetromino = nextTetromino;
       nextTetrominos.push(getNextTetromino());
       nextTetromino = nextTetrominos.shift();
-      
+
     } else {
       [tetromino, hold] = [hold, tetromino]; playSound('hold');
     }
@@ -870,7 +856,7 @@ function isCollidingWithBlock(matrix, cellRow, cellCol) {
         if (x < 0 || x >= playfield[0].length || y >= playfield.length) continue;
 
         if (y >= 0 && playfield[y][x]) {
-          return true; 
+          return true;
         }
       }
     }
