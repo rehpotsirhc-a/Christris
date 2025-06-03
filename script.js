@@ -30,6 +30,18 @@ let speedMode = speedToggle.checked;
 const toggleClearAnimation = document.getElementById('toggle-clear-animation');
 let clearAnimationEnabled = toggleClearAnimation.checked;
 
+const defaultKeyBindings = {
+  moveLeft: 'ArrowLeft',
+  moveRight: 'ArrowRight',
+  softDrop: 'ArrowDown',
+  hardDrop: ' ',  
+  rotateCW: 'ArrowUp',
+  rotateCCW: 's',
+  hold: 'Shift'
+};
+
+let keyBindings = JSON.parse(localStorage.getItem('keyBindings')) || { ...defaultKeyBindings };
+
 
 if (localStorage.getItem('clearAnimationEnabled') !== null) {
   clearAnimationEnabled = localStorage.getItem('clearAnimationEnabled') === 'true';
@@ -710,94 +722,18 @@ document.addEventListener('keydown', function (e) {
 
   if (gameOver || paused || isClearing) return;
 
-  if (e.which === 37 || e.which === 39) {
-    const newCol = e.which === 37 ? tetromino.col - 1 : tetromino.col + 1;
-
-    if (isValidMove(tetromino.matrix, tetromino.row, newCol)) {
-      tetromino.col = newCol;
-      playSound('move');
-    } else {
-      shakeCanvas(e.which === 37 ? 'left' : 'right');
-    }
-  }
-
-  if (e.which === 38 || e.code === 'KeyD') {
-    const rotated = rotate(tetromino.matrix);
-    if (isValidMove(rotated, tetromino.row, tetromino.col)) {
-      tetromino.matrix = rotated;
-      lockStartTime = null;
-      isTouchingGround = false;
-      playSound('rotate');
-    } else {
-      const kicks = [-1, 1, -2, 2];
-      for (let i = 0; i < kicks.length; i++) {
-        const newCol = tetromino.col + kicks[i];
-        if (isValidMove(rotated, tetromino.row, newCol)) {
-          tetromino.col = newCol;
-          tetromino.matrix = rotated;
-          lockStartTime = null;
-          isTouchingGround = false;
-          playSound('rotate');
-          break;
-        }
-      }
-    }
-  }
 
 
-  if (e.which === 40 || e.code === 'Numpad5') {
-    const row = tetromino.row + 1;
-    if (!isValidMove(tetromino.matrix, row, tetromino.col)) {
-      tetromino.row = row - 1;
-      placeTetromino();
-    } else {
-      tetromino.row = row;
-    }
-  }
 
-  if ((e.code === 'ShiftLeft' || e.code === 'ShiftRight') && !heldThisTurn) {
-    if (!hold) {
-      playSound('hold')
-      hold = tetromino;
-      tetromino = nextTetromino;
-      nextTetrominos.push(getNextTetromino());
-      nextTetromino = nextTetrominos.shift();
+  
 
-    } else {
-      [tetromino, hold] = [hold, tetromino]; playSound('hold');
-    }
 
-    tetromino.row = tetromino.name === 'I' ? -1 : -2;
-    tetromino.col = Math.floor(playfield[0].length / 2 - Math.ceil(tetromino.matrix[0].length / 2));
 
-    heldThisTurn = true;
-    updateHoldDisplay();
-    updatePreview();
-  }
+  
 
-  if (e.which === 32) {
-    while (isValidMove(tetromino.matrix, tetromino.row + 1, tetromino.col)) {
-      tetromino.row++;
-    }
-    playSound('harddrop');
-    shakeCanvas('down');
-    placeTetromino();
-  }
+
 });
 
-document.addEventListener('keydown', (e) => {
-  if (paused || gameOver || isClearing) return;
-
-  switch (e.key) {
-    case 's':
-      const ccwMatrix = rotateCounterClockwise(tetromino.matrix);
-      if (isValidMove(ccwMatrix, tetromino.row, tetromino.col)) {
-        tetromino.matrix = ccwMatrix;
-        playSound('rotate');
-      }
-      break;
-  }
-});
 
 toggleHold.addEventListener('change', () => {
   const value = toggleHold.checked;
@@ -1063,3 +999,151 @@ toggleClearAnimation.addEventListener('change', () => {
   localStorage.setItem('clearAnimationEnabled', clearAnimationEnabled);
 });
 
+
+function updateKeyBindingDisplay() {
+  for (const action in keyBindings) {
+    const span = document.getElementById(`bind-${action}`);
+    if (span) span.textContent = keyBindings[action];
+  }
+}
+
+let waitingForKey = null;
+
+document.querySelectorAll('#key-bindings button[data-action]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    waitingForKey = btn.getAttribute('data-action');
+    btn.textContent = 'Press key...';
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (waitingForKey) {
+    e.preventDefault(); // prevent default scrolling etc.
+    keyBindings[waitingForKey] = e.key;
+    localStorage.setItem('keyBindings', JSON.stringify(keyBindings));
+    updateKeyBindingDisplay();
+
+    // Reset button label
+    const btn = document.querySelector(`button[data-action="${waitingForKey}"]`);
+    if (btn) btn.textContent = 'Set';
+
+    waitingForKey = null;
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (paused || gameOver || isClearing || waitingForKey) return;
+
+  const key = e.key;
+
+  // Move Left / Right
+  if (key === keyBindings.moveLeft) {
+    const newCol = tetromino.col - 1;
+    if (isValidMove(tetromino.matrix, tetromino.row, newCol)) {
+      tetromino.col = newCol;
+      playSound('move');
+    } else {
+      shakeCanvas('left');
+    }
+    return;
+  }
+
+  if (key === keyBindings.moveRight) {
+    const newCol = tetromino.col + 1;
+    if (isValidMove(tetromino.matrix, tetromino.row, newCol)) {
+      tetromino.col = newCol;
+      playSound('move');
+    } else {
+      shakeCanvas('right');
+    }
+    return;
+  }
+
+  // Soft Drop
+  if (key === keyBindings.softDrop) {
+    const row = tetromino.row + 1;
+    if (!isValidMove(tetromino.matrix, row, tetromino.col)) {
+      tetromino.row = row - 1;
+      placeTetromino();
+    } else {
+      tetromino.row = row;
+    }
+    return;
+  }
+
+  // Hard Drop
+  if (key === keyBindings.hardDrop) {
+    while (isValidMove(tetromino.matrix, tetromino.row + 1, tetromino.col)) {
+      tetromino.row++;
+    }
+    playSound('harddrop');
+    shakeCanvas('down');
+    placeTetromino();
+    return;
+  }
+
+  // Rotate CW
+  if (key === keyBindings.rotateCW) {
+    const rotated = rotate(tetromino.matrix);
+    if (isValidMove(rotated, tetromino.row, tetromino.col)) {
+      tetromino.matrix = rotated;
+      lockStartTime = null;
+      isTouchingGround = false;
+      playSound('rotate');
+    } else {
+      const kicks = [-1, 1, -2, 2];
+      for (let i = 0; i < kicks.length; i++) {
+        const newCol = tetromino.col + kicks[i];
+        if (isValidMove(rotated, tetromino.row, newCol)) {
+          tetromino.col = newCol;
+          tetromino.matrix = rotated;
+          lockStartTime = null;
+          isTouchingGround = false;
+          playSound('rotate');
+          break;
+        }
+      }
+    }
+    return;
+  }
+
+  // Rotate CCW
+  if (key === keyBindings.rotateCCW) {
+    const rotated = rotateCounterClockwise(tetromino.matrix);
+    if (isValidMove(rotated, tetromino.row, tetromino.col)) {
+      tetromino.matrix = rotated;
+      playSound('rotate');
+    }
+    return;
+  }
+
+  // Hold
+  if (key === keyBindings.hold) {
+    if (heldThisTurn) return;
+
+    if (!hold) {
+      hold = tetromino;
+      tetromino = nextTetromino;
+      nextTetrominos.push(getNextTetromino());
+      nextTetromino = nextTetrominos.shift();
+    } else {
+      [tetromino, hold] = [hold, tetromino];
+    }
+
+    playSound('hold');
+    tetromino.row = tetromino.name === 'I' ? -1 : -2;
+    tetromino.col = Math.floor(playfield[0].length / 2 - Math.ceil(tetromino.matrix[0].length / 2));
+    heldThisTurn = true;
+    updateHoldDisplay();
+    updatePreview();
+    return;
+  }
+});
+
+
+
+document.getElementById('reset-bindings').addEventListener('click', () => {
+  keyBindings = { ...defaultKeyBindings };
+  localStorage.setItem('keyBindings', JSON.stringify(keyBindings));
+  updateKeyBindingDisplay();
+});
