@@ -70,7 +70,10 @@ p {
   width: 150px;
   transform: translate(20%, 30%);
 }
-
+.lll{
+  order: 9;
+  width: 100px;
+}
 #hold {
   background: rgb(14, 14, 14);
   display: flex;
@@ -86,6 +89,7 @@ p {
   padding: 10px;
   border-radius: 6px;
   border: 2px solid #555;
+  order:1
 }
 
 #next canvas {

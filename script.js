@@ -722,16 +722,6 @@ document.addEventListener('keydown', function (e) {
 
   if (gameOver || paused || isClearing) return;
 
-
-
-
-  
-
-
-
-  
-
-
 });
 
 
