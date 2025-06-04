@@ -246,7 +246,7 @@ canvas#game {
 }
 
 #game-container {
-  transition: transform 40ms;
+  transition: transform 60ms;
 }
 
 .header {

@@ -55,7 +55,7 @@ speedToggle.addEventListener('change', () => {
 
 
 let lastCollisionTime = 0;
-const collisionCooldown = 300;
+const collisionCooldown = 200;
 
 const sounds = {
   move: new Audio('sounds/move.mp3'),
@@ -158,7 +158,7 @@ function shakeCanvas(direction) {
   } else if (direction === 'right') {
     transform = 'translateX(8px)';
   } else if (direction === 'down') {
-    transform = 'translateY(8px)';
+    transform = 'translateY(11px)';
   } else {
     transform = 'none';
   }
@@ -167,7 +167,7 @@ function shakeCanvas(direction) {
 
   setTimeout(() => {
     container.style.transform = 'translate(0, 0)';
-  }, 50);
+  }, 60);
 }
 
 
